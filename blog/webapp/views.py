@@ -97,7 +97,7 @@ class CommentCreateView(View):
     def post(self, request, *args, **kwargs):
         form = CommentForm(data=request.POST)
         if form.is_valid():
-            comment = Comment.objects.create(
+            Comment.objects.create(
                 article=form.cleaned_data['article'],
                 author=form.cleaned_data['author'],
                 text=form.cleaned_data['text']
@@ -105,3 +105,37 @@ class CommentCreateView(View):
             return redirect('comment_view')
         else:
             return render(request, 'comment_create.html', context={'form': form})
+
+
+class CommentUpdateView(View):
+    def get(self, request, *args, **kwargs):
+        comment = get_object_or_404(Comment, pk=kwargs['pk'])
+        form = CommentForm(data={
+            'article': comment.article,
+            'author': comment.author,
+            'text': comment.text
+        })
+        return render(request, 'comment_update.html', context={'form': form, 'comment': comment})
+
+    def post(self, request, *args, **kwargs):
+        comment = get_object_or_404(Comment, pk=kwargs['pk'])
+        form = CommentForm(data=request.POST)
+        if form.is_valid():
+            comment.article = form.cleaned_data['article']
+            comment.author = form.cleaned_data['author']
+            comment.text = form.cleaned_data['text']
+            comment.save()
+            return redirect('comment_view')
+        else:
+            return render(request, 'comment_update.html', context={'form': form, 'comment': comment})
+
+
+class CommentDeleteView(View):
+    def get(self, request, *args, **kwargs):
+        comment = get_object_or_404(Comment, pk=kwargs['pk'])
+        return render(request, 'comment_delete.html', context={'comment': comment})
+
+    def post(self, request, *args, **kwargs):
+        comment = get_object_or_404(Comment, pk=kwargs['pk'])
+        comment.delete()
+        return redirect('comment_view')
