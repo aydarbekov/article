@@ -1,8 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views import View
 from django.views.generic import TemplateView
 
-from webapp.forms import ArticleForm
-from webapp.models import Article
+from webapp.forms import ArticleForm, CommentForm
+from webapp.models import Article, Comment
 
 
 class IndexView(TemplateView):
@@ -24,12 +25,12 @@ class ArticleView(TemplateView):
         return context
 
 
-class ArticleCreateView(TemplateView):
-    def get(self, request, **kwargs):
+class ArticleCreateView(View):
+    def get(self, request, *args, **kwargs):
         form = ArticleForm()
         return render(request, 'create.html', context={'form': form})
 
-    def post(self, request, **kwargs):
+    def post(self, request, *args, **kwargs):
         form = ArticleForm(data=request.POST)
         if form.is_valid():
             article = Article.objects.create(
@@ -42,8 +43,9 @@ class ArticleCreateView(TemplateView):
         else:
             return render(request, 'create.html', context={'form': form})
 
-class ArticleUpdateView(TemplateView):
-    def get(self, request, **kwargs):
+
+class ArticleUpdateView(View):
+    def get(self, request, *args, **kwargs):
         article = get_object_or_404(Article, pk=kwargs['pk'])
         form = ArticleForm(data={
             'title': article.title,
@@ -53,7 +55,7 @@ class ArticleUpdateView(TemplateView):
         })
         return render(request, 'update.html', context={'form': form, 'article': article})
 
-    def post(self, request, **kwargs):
+    def post(self, request, *args, **kwargs):
         article = get_object_or_404(Article, pk=kwargs['pk'])
         form = ArticleForm(data=request.POST)
         if form.is_valid():
@@ -67,12 +69,39 @@ class ArticleUpdateView(TemplateView):
             return render(request, 'update.html', context={'form': form, 'article': article})
 
 
-class ArticleDeleteView(TemplateView):
-    def get(self, request, **kwargs):
+class ArticleDeleteView(View):
+    def get(self, request, *args, **kwargs):
         article = get_object_or_404(Article, pk=kwargs['pk'])
         return render(request, 'delete.html', context={'article': article})
 
-    def post(self, request, **kwargs):
+    def post(self, request, *args, **kwargs):
         article = get_object_or_404(Article, pk=kwargs['pk'])
         article.delete()
         return redirect('index')
+
+
+class CommentView(TemplateView):
+    template_name = 'comment.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comments'] = Comment.objects.all().order_by('-created_at')
+        return context
+
+
+class CommentCreateView(View):
+    def get(self, request, *args, **kwargs):
+        form = CommentForm()
+        return render(request, 'comment_create.html', context={'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = CommentForm(data=request.POST)
+        if form.is_valid():
+            comment = Comment.objects.create(
+                article=form.cleaned_data['article'],
+                author=form.cleaned_data['author'],
+                text=form.cleaned_data['text']
+            )
+            return redirect('comment_view')
+        else:
+            return render(request, 'comment_create.html', context={'form': form})
