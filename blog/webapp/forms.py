@@ -1,23 +1,22 @@
 from django import forms
 from django.forms import widgets
 
-from webapp.models import Category, Article
+from webapp.models import Category, Article, Comment
 
 
-class ArticleForm(forms.Form):
-    title = forms.CharField(max_length=200, required=True, label='Title')
-    author = forms.CharField(max_length=40, required=True, label='Author')
-    text = forms.CharField(max_length=3000, required=True, label='Text',
-                           widget=widgets.Textarea)
-    category = forms.ModelChoiceField(queryset=Category.objects.all(), required=False, label='Category',
-                                      empty_label=None)
+class ArticleForm(forms.ModelForm):
+    class Meta:
+        model = Article
+        fields = ['title', 'author', 'text', 'category']
 
 
-class CommentForm(forms.Form):
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['article', 'text', 'author']
 
 
-
-    article = forms.ModelChoiceField(queryset=Article.objects.all(), required=True, label='Article',
-                                empty_label=None)
-    text = forms.CharField(max_length=400, required=True, label='Text', widget=widgets.Textarea)
-    author = forms.CharField(max_length=40, required=False, label='Author', initial='Аноним')
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name']
