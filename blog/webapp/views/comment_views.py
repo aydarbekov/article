@@ -20,7 +20,7 @@ class CommentCreateView(CreateView):
     form_class = CommentForm
 
     def get_success_url(self):
-        return reverse('comment_view')
+        return reverse('webapp:comment_view')
 
 
 class CommentUpdateView(UpdateView):
@@ -30,12 +30,12 @@ class CommentUpdateView(UpdateView):
     context_object_name = 'comment'
 
     def get_success_url(self):
-        return reverse('comment_view')
+        return reverse('webapp:comment_view')
 
 
 class CommentDeleteView(DeleteView):
     template_name = 'comment/comment_delete.html'
     model = Comment
     context_object_name = 'comment'
-    success_url = reverse_lazy('comment_view')
+    success_url = reverse_lazy('webapp:comment_view')
 
