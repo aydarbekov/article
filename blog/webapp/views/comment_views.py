@@ -1,41 +1,83 @@
-from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, ListView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.views.generic import ListView, CreateView, \
+    UpdateView, DeleteView
 
-from webapp.forms import CommentForm
-from webapp.models import Comment
+from webapp.forms import CommentForm, ArticleCommentForm
+from webapp.models import Comment, Article
 
 
-class CommentView(ListView):
-    template_name = 'comment/comment.html'
+class CommentListView(ListView):
     context_object_name = 'comments'
     model = Comment
-    ordering = '-created_at'
-    paginate_by = 5
-    paginate_orphans = 1
+    template_name = 'comment/list.html'
+    ordering = ['-created_at']
+    paginate_by = 10
+    paginate_orphans = 3
 
 
-class CommentCreateView(CreateView):
-    template_name = 'comment/comment_create.html'
+class CommentForArticleCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'comment/create.html'
+    form_class = ArticleCommentForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.article = self.get_article()
+        if self.article.is_archived:
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        self.article.comments.create(**form.cleaned_data)
+        return redirect('webapp:article_view', pk=self.article.pk)
+
+    def get_article(self):
+        article_pk = self.kwargs.get('pk')
+        return get_object_or_404(Article, pk=article_pk)
+
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
+    template_name = 'comment/create.html'
     form_class = CommentForm
 
-    def get_success_url(self):
-        return reverse('webapp:comment_view')
-
-
-class CommentUpdateView(UpdateView):
-    model = Comment
-    template_name = 'comment/comment_update.html'
-    form_class = CommentForm
-    context_object_name = 'comment'
+    # def get_form(self, form_class=None):
+    #     form = super().get_form(form_class)
+    #     form.fields['article'].queryset = Article.objects.filter(status=STATUS_ACTIVE)
+    #     return form
 
     def get_success_url(self):
-        return reverse('webapp:comment_view')
+        return reverse('webapp:article_view', kwargs={'pk': self.object.article.pk})
 
 
-class CommentDeleteView(DeleteView):
-    template_name = 'comment/comment_delete.html'
+class CommentUpdateView(LoginRequiredMixin, UpdateView):
     model = Comment
+    template_name = 'comment/update.html'
+    form_class = ArticleCommentForm
     context_object_name = 'comment'
-    success_url = reverse_lazy('webapp:comment_view')
 
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.article.is_archived:
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse('webapp:article_view', kwargs={'pk': self.object.article.pk})
+
+
+class CommentDeleteView(LoginRequiredMixin, DeleteView):
+    model = Comment
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.article.is_archived:
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse('webapp:article_view', kwargs={'pk': self.object.article.pk})
