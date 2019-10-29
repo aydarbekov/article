@@ -17,13 +17,18 @@
             <li><a href="{% url 'webapp:article_search' %}">Search</a></li>
             <li><a href="{% url 'webapp:comment_list' %}">Comments</a></li>
             {% block menu %}{% endblock %}
-            {% if request.user.is_authenticated %}
-                <li>Привет, {{ request.user }}!</li>
-                <li><a href="{% url 'accounts:logout'  %}">Log Out</a></li>
-            {% else %}
-                <li><a href="{% url 'accounts:login'  %}">Log In</a></li>
-                <li><a href="{% url 'accounts:register' %}">Sign Up</a></li>
-            {% endif %}
+            <li class="menu-right">
+                <ul>
+                    {% if request.user.is_authenticated %}
+                        <li><a href="{% url 'accounts:user_detail' request.user.pk %}">Привет, {{ request.user }}!</a></li>
+                        <li><a href="{% url 'accounts:logout'  %}">Log Out</a></li>
+                    {% else %}
+                        <li><a href="{% url 'accounts:login'  %}">Log In</a></li>
+                        <li><a href="{% url 'accounts:register' %}">Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </li>
+
         </ul>
     </div>
 </nav>

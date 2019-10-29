@@ -127,8 +127,8 @@ LOGIN_URL = 'accounts:login'
 
 # Для тестирования с mailtrap впишите сюда свои настройки с mailtrap.
 EMAIL_HOST = 'smtp.mailtrap.io'
-EMAIL_HOST_USER = ''  # ваш user
-EMAIL_HOST_PASSWORD = ''  # ваш пароль
+EMAIL_HOST_USER = 'aa25f0f2033760'
+EMAIL_HOST_PASSWORD = '9ef7c1717c6756'
 EMAIL_PORT = '2525'
 
 HOST_NAME = 'localhost:8000'

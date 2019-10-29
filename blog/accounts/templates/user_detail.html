@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}{{ user_obj.username }}{% endblock %}
+{% block menu %}
+    {% if user_obj == request.user %}
+        <li><a href="#">Edit</a></li>
+        <li><a href="#">Change password</a></li>
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <h1>Профиль: {{ user_obj.username }}</h1>
+    <p>First Name: <b>{{ user_obj.first_name }}</b></p>
+    <p>Last Name: {{ user_obj.last_name }}</p>
+    <p>Email: {{ user_obj.email }}</p>
+{% endblock %}
