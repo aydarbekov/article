@@ -37,3 +37,9 @@ class UserCreationForm(forms.Form):
             raise ValidationError('Passwords do not match',
                                   code='passwords_do_not_match')
         return self.cleaned_data
+
+
+class UserChangeForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
