@@ -2,8 +2,8 @@
 {% block title %}{{ user_obj.username }}{% endblock %}
 {% block menu %}
     {% if user_obj == request.user %}
-        <li><a href="{% url 'accounts:user_update' user_obj.pk %}">Edit</a></li>
-        <li><a href="#">Change password</a></li>
+        <li><a href="{% url 'accounts:user_update' user_obj.pk %}">Edit profile</a></li>
+        <li><a href="{% url 'accounts:user_change_password' user_obj.pk %}">Change password</a></li>
     {% endif %}
 {% endblock %}
 {% block content %}
